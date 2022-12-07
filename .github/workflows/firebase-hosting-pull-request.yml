@@ -35,7 +35,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v1
       
       - name: Authorize Docker push
-        uses: gcloud auth configure-docker
+        run: gcloud auth configure-docker
 
       - name: Build and Push Container
         run: gcloud builds submit --tag gcr.io/${{ env.PROJECT_ID }}/${{ SERVICE }}
