@@ -7,15 +7,15 @@ on:
       - main
 
 name: Deploy Server and Static Assets to GCP
-env:
-  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  SERVICE: useless-conversions
-  REGION: us-central1
 
 jobs:
   deploy_server:
     name: "Deploy Backend Server"
     runs-on: ubuntu-latest
+    env:
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+      SERVICE: "useless-conversions"
+      REGION: us-central1
 
     permissions:
       contents: 'read'
