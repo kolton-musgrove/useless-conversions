@@ -13,10 +13,10 @@ env:
   REGION: us-central1
 
 jobs:
-  deploy:
+  deploy_server:
+    name: "Deploy Backend Server"
     runs-on: ubuntu-latest
 
-    # Add "id-token" with the intended permissions.
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -25,17 +25,35 @@ jobs:
       - name: 'Checkout'
         uses: actions/checkout@v3
 
-        # Configure Workload Identity Federation and generate an access token.
       - name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v1'
         with:
-          credentials_json: ${{ secrets.CLOUD_BUILD_AND_RUN_SERVICE_ACCOUNT_USELESS_CONVERSIONS}}
-        
-      - name: 'Deploy Server to Google Cloud Run'
-        uses: 'google-github-actions/deploy-cloudrun@v1'
-        with:
-          service: 'useless-conversions'
-          image: 'gcr.io/useless-conversions/useless-conversions'
+          credentials_json: ${{ secrets.CLOUD_BUILD_AND_RUN_SERVICE_ACCOUNT_USELESS_CONVERSIONS }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+      
+      - name: Authorize Docker push
+        uses: gcloud auth configure-docker
+
+      - name: Build and Push Container
+        run: gcloud builds submit --tag gcr.io/${{ env.PROJECT_ID }}/${{ SERVICE }}
+      
+      - name: Deploy to Cloud Run
+        run: |-
+          gcloud run deploy ${{ env.SERVICE }} \
+            --region ${{ env.REGION }} \
+            --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} \
+            --platform "managed" \
+            --quiet
+
+  deploy_static:
+    name: "Deploy Static Assets"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
 
       - name: "Deploy Static Assets to Firebase"
         uses: FirebaseExtended/action-hosting-deploy@v0
