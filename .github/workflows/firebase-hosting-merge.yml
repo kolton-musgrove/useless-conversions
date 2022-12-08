@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      SERVICE: "useless-conversions"
+      SERVICE: useless-conversions
       REGION: us-central1
 
     permissions:
@@ -43,9 +43,9 @@ jobs:
       
       - name: Deploy to Cloud Run
         run: |-
-          gcloud run deploy $SERVICE \
-            --region $REGION \
-            --image gcr.io/$PROJECT_ID/$SERVICE:${{ github.sha }} \
+          gcloud run deploy ${{ env.SERVICE }} \
+            --region ${{ env.REGION }} \
+            --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} \
             --platform "managed" \
             --quiet
 
